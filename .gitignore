@@ -36,7 +36,10 @@ applet/
 *.orig
 *.rej
 *.bak
-*.idea
+workspace.xml
+usage.statistics.xml
+tasks.xml
+shelf/
 *.s
 *.i
 *.ii
