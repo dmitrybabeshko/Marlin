@@ -5,16 +5,7 @@
 
 name: CI
 
-on:
-  pull_request:
-    branches:
-    - bugfix-2.0.x
-    - dev-2.1.x
-    paths-ignore:
-    - config/**
-    - data/**
-    - docs/**
-    - '**/*.md'
+on: push
 
 jobs:
   test_builds:
@@ -26,50 +17,50 @@ jobs:
         test-platform:
         # Base Environments
 
-        - DUE
-        - esp32
-        - linux_native
-        - mega2560
-        - teensy31
-        - teensy35
-        - SAMD51_grandcentral_m4
+        #- DUE
+        #- esp32
+        #- linux_native
+        #- mega2560
+        #- teensy31
+        #- teensy35
+        #- SAMD51_grandcentral_m4
 
         # Extended AVR Environments
 
-        - FYSETC_F6_13
-        - mega1280
-        - rambo
-        - sanguino1284p
-        - sanguino644p
+        #- FYSETC_F6_13
+        #- mega1280
+        #- rambo
+        #- sanguino1284p
+        #- sanguino644p
 
         # Extended STM32 Environments
 
-        - STM32F103RC_btt
-        - STM32F103RC_btt_USB
-        - STM32F103RE_btt
-        - STM32F103RE_btt_USB
-        - STM32F103RC_fysetc
-        - jgaurora_a5s_a1
-        - STM32F103VE_longer
-        - STM32F407VE_black
-        - STM32F401VE_STEVAL
-        - BIGTREE_BTT002
-        - BIGTREE_SKR_PRO
-        - BIGTREE_GTR_V1_0
-        - mks_robin
-        - ARMED
-        - FYSETC_S6
-        - STM32F070RB_malyan
-        - malyan_M300
-        - mks_robin_lite
-        - FLYF407ZG
-        - rumba32_f446ve
-        - rumba32_mks
-        - mks_robin_pro
+        #- STM32F103RC_btt
+        #- STM32F103RC_btt_USB
+        #- STM32F103RE_btt
+        #- STM32F103RE_btt_USB
+        #- STM32F103RC_fysetc
+        #- jgaurora_a5s_a1
+        #- STM32F103VE_longer
+        #- STM32F407VE_black
+        #- STM32F401VE_STEVAL
+        #- BIGTREE_BTT002
+        #- BIGTREE_SKR_PRO
+        #- BIGTREE_GTR_V1_0
+        #- mks_robin
+        #- ARMED
+        #- FYSETC_S6
+        #- STM32F070RB_malyan
+        #- malyan_M300
+        #- mks_robin_lite
+        #- FLYF407ZG
+        #- rumba32_f446ve
+        #- rumba32_mks
+        #- mks_robin_pro
 
         # Put lengthy tests last
 
-        - LPC1768
+        #- LPC1768
         - LPC1769
 
         # STM32 with non-STM framework. both broken for now. they should use HAL_STM32 which is working.
@@ -103,7 +94,7 @@ jobs:
     - name: Run ${{ matrix.test-platform }} Tests
       run: |
         # Inline tests script
-        [[ "$GITHUB_REPOSITORY" == "MarlinFirmware/Marlin" ]] || exit 0
+        [[ "$GITHUB_REPOSITORY" == "dmitrybabeshko/Marlin" ]] || exit 0
         chmod +x buildroot/bin/*
         chmod +x buildroot/share/tests/*
         export PATH=./buildroot/bin/:./buildroot/share/tests/:${PATH}
