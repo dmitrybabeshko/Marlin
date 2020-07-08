@@ -513,6 +513,17 @@
   #error "DIGIPOT_I2C is now DIGIPOT_MCP4451 (or DIGIPOT_MCP4018). Please update Configuration_adv.h."
 #endif
 
+#ifdef FIL_RUNOUT_INVERTING
+  #if FIL_RUNOUT_INVERTING
+    #warning "FIL_RUNOUT_INVERTING true is now FIL_RUNOUT_STATE HIGH. Please update Configuration.h."
+  #else
+    #warning "FIL_RUNOUT_INVERTING false is now FIL_RUNOUT_STATE LOW. Please update Configuration.h."
+  #endif
+  #ifndef FIL_RUNOUT_STATE
+    #define FIL_RUNOUT_STATE ((FIL_RUNOUT_INVERTING) ? HIGH : LOW)
+  #endif
+#endif
+
 /**
  * Probe temp compensation requirements
  */
@@ -1404,12 +1415,16 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
 
 #endif
 
-#if HAS_MESH
-  #if HAS_CLASSIC_JERK
-    static_assert(DEFAULT_ZJERK > 0.1, "Low DEFAULT_ZJERK values are incompatible with mesh-based leveling.");
+#if HAS_MESH && HAS_CLASSIC_JERK
+  static_assert(DEFAULT_ZJERK > 0.1, "Low DEFAULT_ZJERK values are incompatible with mesh-based leveling.");
+#endif
+
+#if ENABLED(G26_MESH_VALIDATION)
+  #if !EXTRUDERS
+    #error "G26_MESH_VALIDATION requires at least one extruder."
+  #elif !HAS_MESH
+    #error "G26_MESH_VALIDATION requires MESH_BED_LEVELING, AUTO_BED_LEVELING_BILINEAR, or AUTO_BED_LEVELING_UBL."
   #endif
-#elif ENABLED(G26_MESH_VALIDATION)
-  #error "G26_MESH_VALIDATION requires MESH_BED_LEVELING, AUTO_BED_LEVELING_BILINEAR, or AUTO_BED_LEVELING_UBL."
 #endif
 
 #if ENABLED(MESH_EDIT_GFX_OVERLAY) && !BOTH(AUTO_BED_LEVELING_UBL, HAS_GRAPHICAL_LCD)
@@ -1478,6 +1493,17 @@ static_assert(hbm[Z_AXIS] >= 0, "HOMING_BUMP_MM.Z must be greater than or equal 
   #elif ENABLED(NO_VOLUMETRICS)
     #error "FILAMENT_WIDTH_SENSOR requires NO_VOLUMETRICS to be disabled."
   #endif
+#endif
+
+/**
+ * System Power Sensor
+ */
+#if ENABLED(POWER_MONITOR_CURRENT) && !PIN_EXISTS(POWER_MONITOR_CURRENT)
+  #error "POWER_MONITOR_CURRENT requires a valid POWER_MONITOR_CURRENT_PIN."
+#elif ENABLED(POWER_MONITOR_VOLTAGE) && !PIN_EXISTS(POWER_MONITOR_VOLTAGE)
+  #error "POWER_MONITOR_VOLTAGE requires POWER_MONITOR_VOLTAGE_PIN to be defined."
+#elif BOTH(POWER_MONITOR_CURRENT, POWER_MONITOR_VOLTAGE) && POWER_MONITOR_CURRENT_PIN == POWER_MONITOR_VOLTAGE_PIN
+  #error "POWER_MONITOR_CURRENT_PIN and POWER_MONITOR_VOLTAGE_PIN must be different."
 #endif
 
 /**
@@ -1614,28 +1640,8 @@ static_assert(hbm[Z_AXIS] >= 0, "HOMING_BUMP_MM.Z must be greater than or equal 
 #endif
 
 /**
- * Test Heater, Temp Sensor, and Extruder Pins; Sensor Type must also be set.
+ * A Sensor ID has to be set for each heater
  */
-#if !HAS_HEATER_0
-  #error "HEATER_0_PIN not defined for this board."
-#elif !ANY_PIN(TEMP_0, MAX6675_SS)
-  #error "TEMP_0_PIN not defined for this board."
-#elif ((defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)) && !PINS_EXIST(E0_STEP, E0_DIR))
-  #error "E0_STEP_PIN or E0_DIR_PIN not defined for this board."
-#elif ( !(defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)) && (!PINS_EXIST(E0_STEP, E0_DIR) || !HAS_E0_ENABLE))
-  #error "E0_STEP_PIN, E0_DIR_PIN, or E0_ENABLE_PIN not defined for this board."
-#elif EXTRUDERS && TEMP_SENSOR_0 == 0
-  #error "TEMP_SENSOR_0 is required with any extruders."
-#endif
-
-// Pins are required for heaters
-#if ENABLED(HEATER_0_USES_MAX6675) && !PIN_EXISTS(MAX6675_SS)
-  #error "MAX6675_SS_PIN (required for TEMP_SENSOR_0) not defined for this board."
-#elif HOTENDS && !HAS_TEMP_HOTEND
-  #error "TEMP_0_PIN (required for TEMP_SENSOR_0) not defined for this board."
-#elif EITHER(HAS_MULTI_HOTEND, HEATERS_PARALLEL) && !HAS_HEATER_1
-  #error "HEATER_1_PIN not defined for this board."
-#endif
 
 #if HAS_MULTI_HOTEND
   #if ENABLED(HEATER_1_USES_MAX6675) && !PIN_EXISTS(MAX6675_SS2)
@@ -1759,9 +1765,13 @@ static_assert(hbm[Z_AXIS] >= 0, "HOMING_BUMP_MM.Z must be greater than or equal 
   #error "TEMP_SENSOR_7 shouldn't be set with only 1 HOTEND."
 #endif
 
+#if TEMP_SENSOR_CHAMBER && !PIN_EXISTS(TEMP_CHAMBER)
+  #error "TEMP_SENSOR_CHAMBER requires TEMP_CHAMBER_PIN. Please add it to your configuration."
+#endif
+
 #if TEMP_SENSOR_PROBE
   #if !PIN_EXISTS(TEMP_PROBE)
-    #error "TEMP_SENSOR_PROBE requires TEMP_PROBE_PIN."
+    #error "TEMP_SENSOR_PROBE requires TEMP_PROBE_PIN. Please add it to your configuration."
   #elif !HAS_TEMP_ADC_PROBE
     #error "TEMP_PROBE_PIN must be an ADC pin."
   #elif !ENABLED(FIX_MOUNTED_PROBE)
@@ -1771,6 +1781,30 @@ static_assert(hbm[Z_AXIS] >= 0, "HOMING_BUMP_MM.Z must be greater than or equal 
 
 #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT) && TEMP_SENSOR_1 == 0
   #error "TEMP_SENSOR_1 is required with TEMP_SENSOR_1_AS_REDUNDANT."
+#endif
+
+/**
+ * Test Heater, Temp Sensor, and Extruder Pins
+ */
+#if !HAS_HEATER_0
+  #error "HEATER_0_PIN not defined for this board."
+#elif !ANY_PIN(TEMP_0, MAX6675_SS)
+  #error "TEMP_0_PIN not defined for this board."
+#elif ((defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)) && !PINS_EXIST(E0_STEP, E0_DIR))
+  #error "E0_STEP_PIN or E0_DIR_PIN not defined for this board."
+#elif ( !(defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)) && (!PINS_EXIST(E0_STEP, E0_DIR) || !HAS_E0_ENABLE))
+  #error "E0_STEP_PIN, E0_DIR_PIN, or E0_ENABLE_PIN not defined for this board."
+#elif EXTRUDERS && TEMP_SENSOR_0 == 0
+  #error "TEMP_SENSOR_0 is required if there are any extruders."
+#endif
+
+// Pins are required for heaters
+#if ENABLED(HEATER_0_USES_MAX6675) && !PIN_EXISTS(MAX6675_SS)
+  #error "MAX6675_SS_PIN (required for TEMP_SENSOR_0) not defined for this board."
+#elif HAS_HOTEND && !HAS_TEMP_HOTEND
+  #error "TEMP_0_PIN (required for TEMP_SENSOR_0) not defined for this board."
+#elif EITHER(HAS_MULTI_HOTEND, HEATERS_PARALLEL) && !HAS_HEATER_1
+  #error "HEATER_1_PIN is not defined. TEMP_SENSOR_1 might not be set, or the board (not EEB / EEF?) doesn't define a pin."
 #endif
 
 /**
@@ -2957,8 +2991,8 @@ static_assert(   _ARR_TEST(3,0) && _ARR_TEST(3,1) && _ARR_TEST(3,2)
   #endif
 #endif
 
-#if HAS_ADC_BUTTONS && defined(ADC_BUTTON_DEBOUNCE_DELAY) && !WITHIN(ADC_BUTTON_DEBOUNCE_DELAY, 16, 255)
-  #error "ADC_BUTTON_DEBOUNCE_DELAY must be an integer from 16 to 255."
+#if HAS_ADC_BUTTONS && defined(ADC_BUTTON_DEBOUNCE_DELAY) && ADC_BUTTON_DEBOUNCE_DELAY < 16
+  #error "ADC_BUTTON_DEBOUNCE_DELAY must be greater than 16."
 #endif
 
 /**
