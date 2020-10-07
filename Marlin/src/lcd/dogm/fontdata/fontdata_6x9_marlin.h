@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 #pragma once
@@ -33,7 +33,7 @@
   Max Font    ascent = 7 descent=-2
 */
 #include <U8glib.h>
-const u8g_fntpgm_uint8_t u8g_font_6x9[2300] U8G_SECTION(".progmem.u8g_font_6x9") = {
+const u8g_fntpgm_uint8_t u8g_font_6x9[2300] U8G_FONT_SECTION(".progmem.u8g_font_6x9") = {
   0, 6, 9, 0, 254, 6, 1, 137, 2, 254, 32, 255, 254, 7, 254, 6,
   254, 0, 0, 0, 6, 0, 7, 1, 6, 6, 6, 2, 0, 128, 128, 128,
   128, 0, 128, 3, 3, 3, 6, 1, 3, 160, 160, 160, 5, 7, 7, 6,
