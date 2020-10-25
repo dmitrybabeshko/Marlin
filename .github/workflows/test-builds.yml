@@ -37,7 +37,8 @@ jobs:
         #- esp32
         #- linux_native
         #- mega2560
-        #- teensy31
+        #- at90usb1286_dfu
+        - teensy31
         #- teensy35
         #- SAMD51_grandcentral_m4
 
@@ -92,7 +93,6 @@ jobs:
 
         # Non-working environment tests
         #- at90usb1286_cdc
-        #- at90usb1286_dfu
         #- STM32F103CB_malyan
         #- mks_robin_mini
 
