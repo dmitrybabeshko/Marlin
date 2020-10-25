@@ -8,7 +8,7 @@ name: CI
 on:
   pull_request:
     branches:
-    - bugfix-2.0.x
+    - bugfix-2.0.x_FBG4S
     paths-ignore:
     - config/**
     - data/**
@@ -16,7 +16,7 @@ on:
     - '**/*.md'
   push:
     branches:
-    - bugfix-2.0.x
+      - bugfix-2.0.x_FBG4S
     paths-ignore:
     - config/**
     - data/**
@@ -78,7 +78,7 @@ jobs:
         #- STM32F103RET6_creality
         #- LERDGEX
         #- mks_robin_nano35
-        - NUCLEO_F767ZI
+        #- NUCLEO_F767ZI
 
         # Put lengthy tests last
 
