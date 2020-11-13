@@ -186,3 +186,6 @@ cmake-build-*
 
 #Python
 __pycache__
+
+#IOLogger logs
+*_log.csv
